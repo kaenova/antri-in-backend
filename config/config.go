@@ -4,6 +4,7 @@ import (
 	"antri-in-backend/utils/errlogger"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
@@ -13,6 +14,7 @@ type Config struct {
 	ServicePort  string
 	DatabaseInit DatabaseInitialization
 	Database     DatabaseConfig
+	SuperUser    SuperUserAccount
 	Secret       string
 }
 
@@ -30,8 +32,18 @@ type DatabaseInitialization struct {
 	InitTestAccount bool `env:"INIT_TEST_ACCOUNT, default=false"`
 }
 
+type SuperUserAccount struct {
+	Email    string `env:"SUPER_USER_EMAIL"`
+	Password string `env:"SUPER_USER_PASSWORD"`
+}
+
 func GetConfig() Config {
 	err := godotenv.Load()
+
+	if strings.TrimSpace(os.Getenv("SUPER_USER_EMAIL")) == "" || strings.TrimSpace(os.Getenv("SUPER_USER_PASSWORD")) == "" {
+		errlogger.FatalPanicMessage("Super User tidak diinisialisasikan")
+	}
+
 	if err != nil {
 		log.Info().Msg("Error reading .env files, continuing without dotenv")
 	} else {
@@ -58,5 +70,9 @@ func GetConfig() Config {
 			SSLMode:  os.Getenv("DATABASE_SSLMODE"),
 		},
 		Secret: os.Getenv("SECRET"),
+		SuperUser: SuperUserAccount{
+			Email:    os.Getenv("SUPER_USER_EMAIL"),
+			Password: os.Getenv("SUPER_USER_PASSWORD"),
+		},
 	}
 }

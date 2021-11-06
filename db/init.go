@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/rs/zerolog/log"
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -28,23 +28,19 @@ func Init(tableDelete, dataInitialization bool) {
 		config.Database.Name,
 		config.Database.SSLMode,
 	)
-	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{SkipDefaultTransaction: true, Logger: logger.Default.LogMode(logger.Info)})
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{SkipDefaultTransaction: true, Logger: logger.Default.LogMode(logger.Info)})
 	errlogger.ErrFatalPanic(err)
 
 	if tableDelete {
-		// log.Info().Msg("menghapus tabel yang ada")
-		// db.Exec(`DROP SCHEMA public CASCADE;
-		// CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres;
-		// GRANT ALL ON SCHEMA public TO public;`)
+		log.Info().Msg("menghapus tabel yang ada")
+		db.Exec(`DROP SCHEMA public CASCADE;
+		CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres;
+		GRANT ALL ON SCHEMA public TO public;`)
 	}
 
-	// Migration(db)
+	Migration(db)
 
-	// if dataInitialization {
-	// 	initData(db)
-	// }
-
-	// DatabaseFinalCheck(db)
+	initData(db)
 
 	log.Info().Msg("database terinisialisasi")
 }
