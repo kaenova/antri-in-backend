@@ -8,28 +8,63 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-type JWTCustomClaims struct {
-	Nama  string `json:"nama"`
+type JWTCustomClaimsAdmin struct {
+	Role  string `json:"role"`
 	Email string `json:"email"`
 	Id    string `json:"id"`
 	jwt.StandardClaims
 }
 
+type JWTCustomClaimsPengantri struct {
+	Id        string `json:"id"`
+	Nama      string `json:"nama"`
+	NoAntrian int    `json:"no_antrian"`
+	IdAntrian string `json:"id_antrian"`
+	jwt.StandardClaims
+}
+
 var (
-	configs   config.Config        = config.GetConfig()
-	JWTconfig middleware.JWTConfig = middleware.JWTConfig{
+	configs        config.Config        = config.GetConfig()
+	JWTconfigAdmin middleware.JWTConfig = middleware.JWTConfig{
 		TokenLookup: "header:Authorization",
-		Claims:      &JWTCustomClaims{},
+		Claims:      &JWTCustomClaimsAdmin{},
+		SigningKey:  []byte(configs.Secret),
+	}
+	JWTconfigPengantri middleware.JWTConfig = middleware.JWTConfig{
+		TokenLookup: "header:Authorization",
+		Claims:      &JWTCustomClaimsPengantri{},
 		SigningKey:  []byte(configs.Secret),
 	}
 )
 
-func GenerateToken(nama, email, id string) (string, error) {
+func GenerateTokenAdmin(role, email, id string) (string, error) {
 	// Set custom claims
-	claims := &JWTCustomClaims{
-		nama,
+	claims := &JWTCustomClaimsAdmin{
+		role,
 		email,
 		id,
+		jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+		},
+	}
+
+	// Create token with claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// Generate encoded token and send it as response.
+	t, err := token.SignedString([]byte(configs.Secret))
+	if err != nil {
+		return "", err
+	}
+	return t, nil
+}
+
+func GenerateTokenPengantri(id, nama, idAntrian string, noAntrian int) (string, error) {
+	// Set custom claims
+	claims := &JWTCustomClaimsPengantri{
+		id,
+		nama,
+		noAntrian,
+		idAntrian,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
 		},
