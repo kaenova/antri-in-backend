@@ -9,6 +9,7 @@ import (
 )
 
 type JWTCustomClaimsAdmin struct {
+	Nama  string `json:"nama"`
 	Role  string `json:"role"`
 	Email string `json:"email"`
 	Id    string `json:"id"`
@@ -37,9 +38,10 @@ var (
 	}
 )
 
-func GenerateTokenAdmin(role, email, id string) (string, error) {
+func GenerateTokenAdmin(nama, role, email, id string) (string, error) {
 	// Set custom claims
 	claims := &JWTCustomClaimsAdmin{
+		nama,
 		role,
 		email,
 		id,
