@@ -9,8 +9,8 @@ import (
 
 func Init(e *echo.Echo) *echo.Echo {
 
-	// e = Auth(e)
-	// e = Produk(e)
+	e = Pengantri(e)
+	e = Antrian(e)
 	e = Admin(e)
 	e = Login(e)
 
