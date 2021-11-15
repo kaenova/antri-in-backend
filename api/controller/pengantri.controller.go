@@ -3,6 +3,7 @@ package controller
 import (
 	"antri-in-backend/api/model"
 	"antri-in-backend/entity"
+	"antri-in-backend/utils"
 	"net/http"
 	"strings"
 
@@ -47,7 +48,14 @@ func PengantriPost(c echo.Context) error {
 		return c.JSON(res.Status, res)
 	}
 
-	res.Data = req
+	token, err := utils.GenerateTokenPengantri(req.ID.String(), req.Nama, req.AntrianID.String(), req.NoAntrian)
+	if err != nil {
+		res.Status = http.StatusInternalServerError
+		res.Message = err.Error()
+		return c.JSON(res.Status, res)
+	}
+
+	res.Data = map[string]string{"token": token}
 	res.Message = "Success"
 	res.Status = http.StatusOK
 	return c.JSON(res.Status, res)
