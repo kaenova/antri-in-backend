@@ -136,3 +136,16 @@ func AmbilPengantribyAntrianID(id uuid.UUID) (interface{}, error) {
 
 	return echo.Map{"antrian": antri, "pengantri": objs}, nil
 }
+
+func AntrianbyID(id uuid.UUID) (entity.Antrian, error) {
+	var obj entity.Antrian
+	db := db.GetDB()
+
+	if err := db.Where("id = ?", id).First(&obj).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return entity.Antrian{}, nil
+		}
+		return entity.Antrian{}, err
+	}
+	return obj, nil
+}

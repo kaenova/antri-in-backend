@@ -3,6 +3,9 @@ package model
 import (
 	"antri-in-backend/db"
 	"antri-in-backend/entity"
+	"errors"
+
+	"gorm.io/gorm"
 )
 
 func AddPengantriToAntrian(obj *entity.Pengantri) error {
@@ -26,4 +29,18 @@ func AddPengantriToAntrian(obj *entity.Pengantri) error {
 	}
 
 	return nil
+}
+
+func NoHPIsUsed(no string) (entity.Pengantri, bool) {
+	var obj entity.Pengantri
+	db := db.GetDB()
+
+	if err := db.Where("no_telp = ?", no).First(&obj).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return obj, false
+		}
+		return obj, true
+	}
+
+	return obj, true
 }
