@@ -5,6 +5,7 @@ import (
 	"antri-in-backend/entity"
 	"antri-in-backend/utils"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/golang-jwt/jwt"
@@ -57,11 +58,12 @@ func AntrianGet(c echo.Context) error {
 
 	/*
 		Priority
-		1. Search by name
-		2. Get ALl
+		1. Search by ID
+		2. Search by name
+		3. Get ALl
 	*/
 
-	// Search
+	// Search by name
 	searchInput := c.QueryParam("search")
 	if strings.TrimSpace(searchInput) != "" && !done {
 		res.Data, err = model.AntrianSearchName(searchInput)
@@ -199,6 +201,37 @@ func AntrianTambah(c echo.Context) error {
 	}
 
 	res.Data = req
+	res.Message = "Success"
+	res.Status = http.StatusOK
+	return c.JSON(res.Status, res)
+}
+
+func AntrianGetAdmin(c echo.Context) error {
+	var (
+		res  entity.Response = entity.CreateResponse()
+		done bool            = false
+		err  error
+	)
+
+	// Get Pengantri
+	antrianInput := c.QueryParam("pengantri")
+	idInput := c.QueryParam("id")
+	if strings.TrimSpace(antrianInput) != "" && strings.TrimSpace(idInput) != "" && !done {
+		_, err1 := strconv.ParseBool(antrianInput)
+		idAntrian, err2 := uuid.Parse(idInput)
+		if err1 != nil || err2 != nil {
+			res.Message = "Kesalahan parameter, harap cek dokumentasi API"
+			return c.JSON(res.Status, res)
+		}
+		res.Data, err = model.AmbilPengantribyAntrianID(idAntrian)
+		if err != nil {
+			res.Message = err.Error()
+			res.Status = http.StatusInternalServerError
+			return c.JSON(res.Status, res)
+		}
+		done = true
+	}
+
 	res.Message = "Success"
 	res.Status = http.StatusOK
 	return c.JSON(res.Status, res)

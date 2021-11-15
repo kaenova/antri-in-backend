@@ -13,9 +13,12 @@ func Antrian(e *echo.Echo) *echo.Echo {
 	e.GET("/antrian", controller.AntrianGet)
 
 	// Admin Only
-	e.POST("/antrian", controller.AntrianPost, middleware.JWTWithConfig(utils.JWTconfigAdmin))
-	e.PUT("/antrian", controller.AntrianPut, middleware.JWTWithConfig(utils.JWTconfigAdmin))
-	e.DELETE("/antrian", controller.AntrianDelete, middleware.JWTWithConfig(utils.JWTconfigAdmin))
+	g := e.Group("/admin/antrian")
+	g.Use(middleware.JWTWithConfig(utils.JWTconfigAdmin))
+	g.POST("", controller.AntrianPost)
+	g.PUT("", controller.AntrianPut)
+	g.DELETE("", controller.AntrianDelete)
+	g.GET("", controller.AntrianGetAdmin)
 
 	e.POST("/tambah", controller.AntrianTambah, middleware.JWTWithConfig(utils.JWTconfigAdmin))
 

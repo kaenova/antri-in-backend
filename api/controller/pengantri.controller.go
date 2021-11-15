@@ -23,6 +23,7 @@ func PengantriPost(c echo.Context) error {
 	idAntrianInput := c.FormValue("antrian_id")
 
 	// Nomor HP Mau diperiksa?
+	// Periksa, nohp harus unik
 
 	// Chcek Input
 	if strings.TrimSpace(namaInput) == "" || strings.TrimSpace(noHPInput) == "" {
@@ -60,3 +61,5 @@ func PengantriPost(c echo.Context) error {
 	res.Status = http.StatusOK
 	return c.JSON(res.Status, res)
 }
+
+// Fetch by No HP

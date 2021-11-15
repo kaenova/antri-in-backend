@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -111,4 +112,27 @@ func TambahNomorAntrian(obj *entity.Antrian) error {
 		return err
 	}
 	return nil
+}
+
+func AmbilPengantribyAntrianID(id uuid.UUID) (interface{}, error) {
+	var objs []entity.Pengantri
+	var antri entity.Antrian
+
+	db := db.GetDB()
+
+	if err := db.Where("id = ?", id).Find(&antri).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	if err := db.Where("antrian_id = ?", id).Find(&objs).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return echo.Map{"antrian": antri, "pengantri": objs}, nil
 }
