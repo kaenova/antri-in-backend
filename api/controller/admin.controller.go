@@ -8,6 +8,8 @@ import (
 	"net/mail"
 	"strings"
 
+	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -71,6 +73,101 @@ func AdminPost(c echo.Context) error {
 	data.Role = ""
 
 	res.Data = data
+	res.Status = http.StatusOK
+	res.Message = "Success"
+	return c.JSON(res.Status, res)
+}
+
+func AdminRequestGet(c echo.Context) error {
+	var (
+		res entity.Response = entity.CreateResponse()
+		err error
+	)
+
+	// Cek apakah super user?
+	userData := c.Get("user").(*jwt.Token)
+	claims := userData.Claims.(*utils.JWTCustomClaimsAdmin)
+	roles := claims.Role
+	if roles != entity.ROLES_SUPER_USER {
+		res.Message = "Not Authorized"
+		return c.JSON(res.Status, res)
+	}
+
+	res.Data, err = model.AdminRequestAll()
+	if err != nil {
+		res.Status = http.StatusInternalServerError
+		res.Message = err.Error()
+		return c.JSON(res.Status, res)
+	}
+
+	res.Status = http.StatusOK
+	res.Message = "Success"
+	return c.JSON(res.Status, res)
+}
+
+func AdminRequestPost(c echo.Context) error {
+	var (
+		res entity.Response = entity.CreateResponse()
+		err error
+	)
+
+	// Cek apakah super user?
+	userData := c.Get("user").(*jwt.Token)
+	claims := userData.Claims.(*utils.JWTCustomClaimsAdmin)
+	roles := claims.Role
+	if roles != entity.ROLES_SUPER_USER {
+		res.Message = "Not Authorized"
+		return c.JSON(res.Status, res)
+	}
+
+	idInput := c.QueryParam("id")
+	idAdmin, err := uuid.Parse(idInput)
+	if err != nil {
+		res.Message = "ID not valid"
+		return c.JSON(res.Status, res)
+	}
+
+	err = model.AcceptAdmin(idAdmin)
+	if err != nil {
+		res.Status = http.StatusInternalServerError
+		res.Message = err.Error()
+		return c.JSON(res.Status, res)
+	}
+
+	res.Status = http.StatusOK
+	res.Message = "Success"
+	return c.JSON(res.Status, res)
+}
+
+func AdminRequestDelete(c echo.Context) error {
+	var (
+		res entity.Response = entity.CreateResponse()
+		err error
+	)
+
+	// Cek apakah super user?
+	userData := c.Get("user").(*jwt.Token)
+	claims := userData.Claims.(*utils.JWTCustomClaimsAdmin)
+	roles := claims.Role
+	if roles != entity.ROLES_SUPER_USER {
+		res.Message = "Not Authorized"
+		return c.JSON(res.Status, res)
+	}
+
+	idInput := c.QueryParam("id")
+	idAdmin, err := uuid.Parse(idInput)
+	if err != nil {
+		res.Message = "ID not valid"
+		return c.JSON(res.Status, res)
+	}
+
+	err = model.DeleteAdmin(idAdmin)
+	if err != nil {
+		res.Status = http.StatusInternalServerError
+		res.Message = err.Error()
+		return c.JSON(res.Status, res)
+	}
+
 	res.Status = http.StatusOK
 	res.Message = "Success"
 	return c.JSON(res.Status, res)

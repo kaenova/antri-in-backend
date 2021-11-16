@@ -26,7 +26,7 @@ func LoginPost(c echo.Context) error {
 	}
 
 	// Check Email
-	used, obj := model.AdminEmailIsUsed(emailForm)
+	used, obj := model.Login(emailForm)
 	if !used {
 		res.Message = "Email tidak terdaftar"
 		return c.JSON(res.Status, res)
