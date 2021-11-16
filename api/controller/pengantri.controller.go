@@ -123,7 +123,54 @@ func PengantriTrace(c echo.Context) error {
 		return c.JSON(res.Status, res)
 	}
 
+	res.Data = echo.Map{"antrian": res.Data, "no_antrian_pengantri": claims.NoAntrian}
 	res.Status = http.StatusOK
 	res.Message = "Success"
+	return c.JSON(res.Status, res)
+}
+
+func PengantriDelete(c echo.Context) error {
+	var (
+		res             entity.Response = entity.CreateResponse()
+		err, err1, err2 error
+		idString        string
+		idUser          uuid.UUID
+		jwtData         *jwt.Token
+	)
+	// Query Input Token Or Ppengantri ID
+	tokenOrIDInput := c.FormValue("token_id")
+	if strings.TrimSpace(tokenOrIDInput) == "" {
+		res.Message = "Invalid Input"
+		return c.JSON(res.Status, res)
+	}
+
+	// Menggunakan Token
+	jwtData, err1 = utils.JWTTokenFromStringPengantri(tokenOrIDInput)
+	idUser, err2 = uuid.Parse(tokenOrIDInput)
+	if err1 != nil && err2 != nil {
+		res.Message = err1.Error()
+		return c.JSON(res.Status, res)
+	}
+
+	if err2 != nil {
+		claims := jwtData.Claims.(*utils.JWTCustomClaimsPengantri)
+		// DONT TOUCH IT
+		idString = claims.Id
+		idUser, err = uuid.Parse(idString)
+		if err != nil {
+			res.Message = "Invalid Input"
+			return c.JSON(res.Status, res)
+		}
+	}
+
+	err = model.DeletePengantri(idUser)
+	if err != nil {
+		res.Status = http.StatusInternalServerError
+		res.Message = err.Error()
+		return c.JSON(res.Status, res)
+	}
+
+	res.Message = "Success"
+	res.Status = http.StatusOK
 	return c.JSON(res.Status, res)
 }

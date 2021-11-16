@@ -2,6 +2,7 @@ package utils
 
 import (
 	"antri-in-backend/config"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -80,4 +81,20 @@ func GenerateTokenPengantri(id, nama, idAntrian string, noAntrian int) (string, 
 		return "", err
 	}
 	return t, nil
+}
+
+func JWTTokenFromStringPengantri(key string) (*jwt.Token, error) {
+	token, err := jwt.ParseWithClaims(key, &JWTCustomClaimsPengantri{}, func(t *jwt.Token) (interface{}, error) {
+		conf := config.GetConfig()
+		if t.Method.Alg() != "HS256" {
+			return nil, fmt.Errorf("unexpected jwt signing method=%v", t.Header["alg"])
+		}
+		return []byte(conf.Secret), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return token, nil
 }

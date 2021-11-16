@@ -12,7 +12,6 @@ type Pengantri struct {
 	Nama      string    `gorm:"not null" json:"nama"`
 	NoTelp    string    `gorm:"not null" json:"no_telp"`
 	NoAntrian int       `gorm:"not null" json:"no_antrian"`
-	IsCancel  bool      `gorm:"not null" json:"is_cancel"`
 
 	AntrianID uuid.UUID `gorm:"not null;index" json:"antrian_id"`
 	Antrian   *Antrian  `gorm:"foreignKey:AntrianID" json:"antrian,omitempty"`
@@ -28,6 +27,5 @@ func (Pengantri) TableName() string {
 
 func (u *Pengantri) BeforeCreate(tx *gorm.DB) (err error) {
 	u.ID = uuid.New()
-	u.IsCancel = false
 	return
 }

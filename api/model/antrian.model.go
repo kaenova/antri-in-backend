@@ -104,13 +104,29 @@ func AntrianUbah(obj *entity.Antrian) error {
 
 func TambahNomorAntrian(obj *entity.Antrian) error {
 	db := db.GetDB()
+	// Ambil nomor antrian
 	if err := db.Where("id = ?", obj.ID).First(&obj).Error; err != nil {
 		return err
 	}
-	obj.CurrNomorAntrian = obj.CurrNomorAntrian + 1
-	if err := db.Save(&obj).Error; err != nil {
-		return err
+
+	tx := db.Begin()
+	tx.SavePoint("sp1")
+	if obj.MaxNomorAntrian >= obj.CurrNomorAntrian {
+		// Hapus data pengantri
+		if err := tx.Delete(&entity.Pengantri{}, "no_antrian = ? AND antrian_id = ?", obj.CurrNomorAntrian, obj.ID).Error; err != nil && !errors.Is(gorm.ErrRecordNotFound, err) {
+			tx.RollbackTo("sp1")
+			tx.Commit()
+			return err
+		}
+
+		obj.CurrNomorAntrian = obj.CurrNomorAntrian + 1
+		if err := tx.Save(&obj).Error; err != nil {
+			tx.RollbackTo("sp1")
+			tx.Commit()
+			return err
+		}
 	}
+	tx.Commit()
 	return nil
 }
 

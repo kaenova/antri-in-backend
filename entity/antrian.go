@@ -12,6 +12,7 @@ type Antrian struct {
 	Nama             string         `gorm:"not null" json:"nama"`
 	Deskripsi        string         `gorm:"" json:"deskripsi"`
 	CurrNomorAntrian int            `gorm:"not null" json:"curr_antrian"`
+	MaxNomorAntrian  int            `gorm:"not null" json:"max_antrian"`
 	EstimasiAntrian  float32        `gorm:"not null" json:"estimasi_menit"`
 	CreatedAt        time.Time      `gorm:"type:timestamptz;not null" json:"created_at,omitempty"`
 	UpdatedAt        time.Time      `gorm:"type:timestamptz;not null" json:"updated_at,omitempty"`
@@ -26,5 +27,6 @@ func (u *Antrian) BeforeCreate(tx *gorm.DB) (err error) {
 	u.ID = uuid.New()
 	u.CurrNomorAntrian = 0
 	u.EstimasiAntrian = 0
+	u.MaxNomorAntrian = 0
 	return
 }

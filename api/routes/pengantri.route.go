@@ -12,6 +12,7 @@ func Pengantri(e *echo.Echo) *echo.Echo {
 	g := e.Group("/pengantri")
 	g.POST("", controller.PengantriPost)
 	g.GET("", controller.PengantriGet)
+	g.DELETE("", controller.PengantriDelete)
 
 	e.GET("/trace", controller.PengantriTrace, middleware.JWTWithConfig(utils.JWTconfigPengantri))
 	return e
