@@ -12,6 +12,8 @@ func Init() *echo.Echo {
 	log.Info().Msg("menginisialisasikan server")
 
 	e := echo.New()
+	e.Use(middleware.CORS())
+	e.Use(middleware.Gzip())
 	e.Use(middleware.Logger())
 	e = routes.Init(e)
 
