@@ -63,6 +63,23 @@ func AntrianGet(c echo.Context) error {
 		3. Get ALl
 	*/
 
+	// Search by ID
+	idInput := c.QueryParam("id")
+	if strings.TrimSpace(idInput) != "" && !done {
+		idAntrian, err := uuid.Parse(idInput)
+		if err != nil {
+			res.Message = "ID Tidak Valid"
+			return c.JSON(res.Status, res)
+		}
+		res.Data, err = model.AntrianbyID(idAntrian)
+		if err != nil {
+			res.Status = http.StatusInternalServerError
+			res.Message = err.Error()
+			return c.JSON(res.Status, res)
+		}
+		done = true
+	}
+
 	// Search by name
 	searchInput := c.QueryParam("search")
 	if strings.TrimSpace(searchInput) != "" && !done {
