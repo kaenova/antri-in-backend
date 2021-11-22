@@ -24,6 +24,13 @@ func AntrianPost(c echo.Context) error {
 	deskripsiInput := c.FormValue("deskripsi")
 
 	// Apakah mau di cek role yang buat?
+	userData := c.Get("user").(*jwt.Token)
+	claims := userData.Claims.(*utils.JWTCustomClaimsAdmin)
+	roles := claims.Role
+	if roles != entity.ROLES_SUPER_USER {
+		res.Message = "Not Authorized"
+		return c.JSON(res.Status, res)
+	}
 
 	// Chcek Input
 	if strings.TrimSpace(namaInput) == "" || strings.TrimSpace(deskripsiInput) == "" {
@@ -35,8 +42,21 @@ func AntrianPost(c echo.Context) error {
 	req.Nama = namaInput
 	req.Deskripsi = deskripsiInput
 
+	// Cek apakah ada nama yang sama?
+	used, err := model.AntrianSearchNameExactUsed(req.Nama)
+	if err != nil {
+		res.Status = http.StatusInternalServerError
+		res.Message = "Internal Server Error"
+		return c.JSON(res.Status, res)
+	}
+
+	if used {
+		res.Message = "Antrian sudah digunakan"
+		return c.JSON(res.Status, res)
+	}
+
 	// Input to DB
-	err := model.AntrianCreate(&req)
+	err = model.AntrianCreate(&req)
 	if err != nil {
 		res.Status = http.StatusInternalServerError
 		res.Message = err.Error()

@@ -165,3 +165,21 @@ func AntrianbyID(id uuid.UUID) (entity.Antrian, error) {
 	}
 	return obj, nil
 }
+
+func AntrianSearchNameExactUsed(cat string) (bool, error) {
+	var (
+		objs entity.Antrian
+	)
+
+	db := db.GetDB()
+
+	tx := db.Where("LOWER(nama) = LOWER(?)", cat).First(&objs)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+		return false, tx.Error
+	}
+
+	return true, nil
+}
