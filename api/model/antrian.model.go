@@ -111,7 +111,7 @@ func TambahNomorAntrian(obj *entity.Antrian) error {
 
 	tx := db.Begin()
 	tx.SavePoint("sp1")
-	if obj.MaxNomorAntrian >= obj.CurrNomorAntrian {
+	if obj.MaxNomorAntrian > obj.CurrNomorAntrian {
 		// Hapus data pengantri
 		if err := tx.Delete(&entity.Pengantri{}, "no_antrian = ? AND antrian_id = ?", obj.CurrNomorAntrian, obj.ID).Error; err != nil && !errors.Is(gorm.ErrRecordNotFound, err) {
 			tx.RollbackTo("sp1")
