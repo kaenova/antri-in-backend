@@ -94,6 +94,7 @@ func AntrianUbah(obj *entity.Antrian) error {
 
 	obj.CurrNomorAntrian = tempAntrian.CurrNomorAntrian
 	obj.EstimasiAntrian = tempAntrian.EstimasiAntrian
+	obj.MaxNomorAntrian = tempAntrian.MaxNomorAntrian
 
 	if err := db.Save(&obj).Error; err != nil {
 		return err
@@ -136,7 +137,7 @@ func AmbilPengantribyAntrianID(id uuid.UUID) (interface{}, error) {
 
 	db := db.GetDB()
 
-	if err := db.Where("id = ?", id).Find(&antri).Error; err != nil {
+	if err := db.Where("id = ?", id).First(&antri).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
