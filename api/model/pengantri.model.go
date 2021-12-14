@@ -62,7 +62,7 @@ func NoHPIsUsed(no string) (entity.Pengantri, bool) {
 	var obj entity.Pengantri
 	db := db.GetDB()
 
-	if err := db.Where("no_telp = ?", no).First(&obj).Error; err != nil {
+	if err := db.Where("no_telp = ? AND deleted_at is NULL", no).First(&obj).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return obj, false
 		}
